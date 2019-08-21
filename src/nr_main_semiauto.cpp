@@ -191,34 +191,6 @@ NrMain::NrMain(void)
     this->command_list = &NrMain::commands;
 }
 
-void NrMain::motorStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
-{
-	ControllerCommands status = (ControllerCommands)msg->data;
-
-    switch (status)
-    {
-        case ControllerCommands::shutdown:
-            if (this->base_last_status != ControllerCommands::shutdown)
-            {
-                this->shutdown();
-            }
-            break;
-
-        case ControllerCommands::reset:
-            if (this->base_last_status == ControllerCommands::shutdown)
-            {
-                this->reset();
-                this->_has_base_reseted = true;
-            }
-            break;
-
-        default:
-            break;
-    }
-
-    base_last_status = status;
-}
-
 void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
 {
     static bool last_a = false;
