@@ -110,7 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES nhk2019_main_ros
+#  LIBRARIES Naturobo2019PublicSecuurityRobot
 #  CATKIN_DEPENDS can_msgs geometry_msgs nav_msgs roscpp sensor_msgs std_msgs tf tf2
 #  DEPENDS system_lib
 )
@@ -128,7 +128,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/nhk2019_main_ros.cpp
+#   src/${PROJECT_NAME}/Naturobo2019PublicSecurityRobot.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -203,13 +203,9 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(mr1_main_semiauto src/mr1_main_semiauto.cpp)
-target_link_libraries(mr1_main_semiauto ${catkin_LIBRARIES})
+add_executable(nr_main_semiauto src/nr_main_semiauto.cpp)
+target_link_libraries(nr_main_semiauto ${catkin_LIBRARIES})
 
-add_executable(mr1_can src/mr1_can.cpp)
-target_link_libraries(mr1_can ${catkin_LIBRARIES})
-add_dependencies(mr1_can ${catkin_EXPORTED_TARGETS})
-
-add_executable(usb_can_node_19 src/usb_can_node_19.cpp)
-target_link_libraries(usb_can_node_19 ${catkin_LIBRARIES})
-add_dependencies(usb_can_node_19 ${catkin_EXPORTED_TARGETS})
+add_executable(nr_can src/nr_can.cpp)
+target_link_libraries(nr_can ${catkin_LIBRARIES})
+add_dependencies(nr_can ${catkin_EXPORTED_TARGETS})

@@ -56,13 +56,13 @@ public:
     NrCanNode(void);
 
 private:
-    void baseCmdCallback(const std_msgs::Uint8::ConstPtr& msg);//これで一度に送ると、よくデータが落ちてしまうらしい
+    void baseCmdCallback(const std_msgs::UInt8::ConstPtr& msg);
     void motor0CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
     void motor1CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
     void motor2CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
     void motor3CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
 
-    void moveslipperCmdCallback(const std_msgs::Uint8::ConstPtr& msg);
+    void moveslipperCmdCallback(const std_msgs::UInt8::ConstPtr& msg);
     void setcollectingcaseCmdCallback(const std_msgs::UInt8::ConstPtr& msg);
     void setcollectingcaseCmdPosCallback(const std_msgs::Float32::ConstPtr& msg);
 
@@ -111,22 +111,23 @@ NrCanNode::NrCanNode(void)
     _can_tx_pub				    = _nh.advertise<can_msgs::CanFrame>("can_tx", 10);
     _can_rx_sub				    = _nh.subscribe<can_msgs::CanFrame>("can_rx", 10, &NrCanNode::canRxCallback, this);
 
-    _moveslipper_status_pub	    = _nh.advertise<std_msgs::Uint8>("moveslipper/status", 10);
-    _moveslipper_cmd_sub		    = _nh.subscribe<std_msgs::Uint8>("moveslipper/cmd", 10, &NrCanNode::moveslipperCmdCallback, this);
+    _moveslipper_status_pub	    = _nh.advertise<std_msgs::UInt8>("moveslipper/status", 10);
+    _moveslipper_cmd_sub		    = _nh.subscribe<std_msgs::UInt8>("moveslipper/cmd", 10, &NrCanNode::moveslipperCmdCallback, this);
 
-    _base_cmd_sub			    = _nh.subscribe<std_msgs::Uint16>("base/cmd", 10 , &NrCanNode::baseCmdCallback, this);
+    _base_cmd_sub			    = _nh.subscribe<std_msgs::UInt8>("base/cmd", 10 , &NrCanNode::baseCmdCallback, this);
     _base_motor0_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor0_cmd_vel", 10, &NrCanNode::motor0CmdVelCallback, this);
     _base_motor1_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor1_cmd_vel", 10, &NrCanNode::motor1CmdVelCallback, this);
     _base_motor2_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor2_cmd_vel", 10, &NrCanNode::motor2CmdVelCallback, this);
     _base_motor3_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor3_cmd_vel", 10, &NrCanNode::motor3CmdVelCallback, this);
 
     _set_collectingcase_status_pub      = _nh.advertise<std_msgs::UInt8>("motor_status", 10);
+
     _set_collectingcase_cmd_sub	        = _nh.subscribe<std_msgs::UInt8>("set_collectingcase_cmd", 10, &NrCanNode::setcollectingcaseCmdCallback, this);
     _set_collectingcase_cmd_pos_sub	    = _nh.subscribe<std_msgs::Float32>("set_collectingcase_cmd_pos", 10, &NrCanNode::setcollectingcaseCmdPosCallback, this);
 }
 
 
-void NrCanNode::baseCmdCallback(const std_msgs::Uint8::ConstPtr& msg)
+void NrCanNode::baseCmdCallback(const std_msgs::UInt8::ConstPtr& msg)
 {
     this->sendData(id_base_motor0_cmd, msg->data);
     this->sendData(id_base_motor1_cmd, msg->data);
@@ -154,7 +155,7 @@ void NrCanNode::motor3CmdVelCallback(const std_msgs::Float32::ConstPtr& msg)
     this->sendData(id_base_motor3_cmd_vel, msg->data);
 }
 
-void NrCanNode::moveslipperCmdCallback(const std_msgs::Uint8::ConstPtr& msg)
+void NrCanNode::moveslipperCmdCallback(const std_msgs::UInt8::ConstPtr& msg)
 {
     this->sendData(id_moveslipperCmd, msg->data);
 }
@@ -171,7 +172,7 @@ void NrCanNode::setcollectingcaseCmdPosCallback(const std_msgs::Float32::ConstPt
 
 void NrCanNode::canRxCallback(const can_msgs::CanFrame::ConstPtr &msg)
 {
-    std_msgs::Uint8 _moveslipper_status_msg;
+    std_msgs::UInt8 _moveslipper_status_msg;
     std_msgs::UInt8 _set_collectingcase_status_msg;
 
     switch(msg->id)
@@ -212,7 +213,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "nr_can");
     ROS_INFO("nr_can node has started.");
 
-    NrCanNode *NrCanNode = new ();
+    NrCanNode *nrCanNode = new NrCanNode();
 
     ros::spin();
 }

@@ -94,6 +94,8 @@ private:
 
     const std::vector<ControllerCommands> *command_list;
 
+    static const std::vector<ControllerCommands> commands;
+
     //この下の関数はcanにこのコマンドを行うために送るデータを決定する関数
     void shutdown(void);
     void reset(void);
@@ -148,15 +150,14 @@ int NrMain::AxisRightThumbY = 4;
 int NrMain::AxisLeftTrigger = 2;
 int NrMain::AxisRightTrigger = 5;
 
-const std::vector<ControllerCommands> NrMain::commands(
+const std::vector<ControllerCommands> NrMain::commands
     {
 		ControllerCommands::elavate_case,
 		ControllerCommands::descent_case,
 
 		ControllerCommands::send_slipper,
 		ControllerCommands::shrink_cylinder,
-    }
-);
+    };
 
 NrMain::NrMain(void)
 {
