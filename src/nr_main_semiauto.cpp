@@ -92,6 +92,9 @@ private:
 
     ros::Subscriber joy_sub;
 
+    ros::Publisher cmd_vel_pub;
+    geometry_msgs::Twist cmd_vel_msg;
+
     const std::vector<ControllerCommands> *command_list;
 
     static const std::vector<ControllerCommands> commands;
@@ -276,37 +279,34 @@ void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
     last_x = _x;
     last_y = _y;
 
-    if (this->_is_manual_enabled)
+    double vel_x = joy->axes[AxisRightThumbX];
+    double vel_y = joy->axes[AxisRightThumbY];
+    double vel_yaw_l = (joy->axes[AxisLeftTrigger] - 1.0) * (1.0 - 0.0) / (- 1.0 - 1.0) + 0.0;
+    double vel_yaw_r = (joy->axes[AxisRightTrigger] - 1.0) * (- 1.0 - 0.0) / (- 1.0 - 1.0) + 0.0;
+    double vel_yaw = vel_yaw_l + vel_yaw_r;
+
+    double vel_norm = hypot(vel_x, vel_y);
+    if (vel_norm > 1.0)
     {
-        double vel_x = joy->axes[AxisRightThumbX];
-        double vel_y = joy->axes[AxisRightThumbY];
-        double vel_yaw_l = (joy->axes[AxisLeftTrigger] - 1.0) * (1.0 - 0.0) / (- 1.0 - 1.0) + 0.0;
-        double vel_yaw_r = (joy->axes[AxisRightTrigger] - 1.0) * (- 1.0 - 0.0) / (- 1.0 - 1.0) + 0.0;
-        double vel_yaw = vel_yaw_l + vel_yaw_r;
-
-        double vel_norm = hypot(vel_x, vel_y);
-        if (vel_norm > 1.0)
-        {
-            vel_x /= vel_norm;
-            vel_y /= vel_norm;
-        }
-
-        this->cmd_vel_msg.linear.x = -vel_x;
-        this->cmd_vel_msg.linear.y = vel_y;
-        this->cmd_vel_msg.angular.z = vel_yaw;
-        this->cmd_vel_pub.publish(this->cmd_vel_msg);
+    	vel_x /= vel_norm;
+    	vel_y /= vel_norm;
     }
+
+    this->cmd_vel_msg.linear.x = -vel_x;
+    this->cmd_vel_msg.linear.y = vel_y;
+    this->cmd_vel_msg.angular.z = vel_yaw;
+    this->cmd_vel_pub.publish(this->cmd_vel_msg);
 }
 
 void NrMain::shutdown(void)
 {
-    move_slipper_cmd_msg.data = (uint16_t)moveslipperCommands::shutdown_cmd;
+    move_slipper_cmd_msg = (uint16_t)moveslipperCommands::shutdown_cmd;
     move_slipper_cmd_pub.publish(move_slipper_cmd_msg);
 
-    base_cmd_msg.data = (uint16_t)BaseCommands::shutdown_cmd;
+    base_cmd_msg = (uint16_t)BaseCommands::shutdown_cmd;
     base_cmd_pub.publish(base_cmd_msg);
 
-    set_collectingcase_cmd_msg.data = (uint8_t)MotorCommands::shutdown_cmd;
+    set_collectingcase_cmd_msg = (uint8_t)MotorCommands::shutdown_cmd;
     set_collectingcase_cmd_pub.publish(set_collectingcase_cmd_msg);
 }
 
@@ -314,60 +314,50 @@ void NrMain::reset(void)
 {
     ROS_INFO("reset.");
 
-    move_slipper_cmd_msg.data = (uint16_t)moveslipperCommands::reset_cmd;
+    move_slipper_cmd_msg = (uint16_t)moveslipperCommands::reset_cmd;
     move_slipper_cmd_pub.publish(move_slipper_cmd_msg);
 
-    base_cmd_msg.data = (uint16_t)BaseCommands::reset_cmd;
+    base_cmd_msg = (uint16_t)BaseCommands::reset_cmd;
     base_cmd_pub.publish(base_cmd_msg);
     NrMain::reset_arm();
 
-    set_collectingcase_cmd_msg.data = (uint8_t)MotorCommands::reset_cmd;
+    set_collectingcase_cmd_msg = (uint8_t)MotorCommands::reset_cmd;
     set_collectingcase_cmd_pub.publish(set_collectingcase_cmd_msg);
-
-
-
-    if (this->_op_mode == OpMode::full_op)
-    {
-        base_cmd_msg.data = (uint16_t)BaseCommands::operational_cmd;
-        base_cmd_pub.publish(base_cmd_msg);
-    }
-
-    this->clear_flags();
 }
 
 void NrMain::set_arm(void)//次の位置へとアームを動かす
 {
-	set_collectingcase_cmd_msg.data = angle;//angleには移動値を入れる予定
+	set_collectingcase_cmd_msg = angle;//angleには移動値を入れる予定
 	set_collectingcase_cmd_pos_pub.publish(set_collectingcase_cmd_pos_msg);
 }
 
 void NrMain::reset_arm(void)//アームを初期位置へと戻す
 {
-	set_collectingcase_cmd_msg.data = 0.0;
+	set_collectingcase_cmd_msg = 0.0;
 	set_collectingcase_cmd_pos_pub.publish(set_collectingcase_cmd_pos_msg);
 }
 
 void NrMain::elavate_case(void)//昇降
 {
-	move_slipper_status_sub.data |= (uint16_t)moveslipperCommands::elavate_case_cmd;
+	move_slipper_status_sub |= (uint16_t)moveslipperCommands::elavate_case_cmd;
 	move_slipper_cmd_pub.publish(move_slipper_status_sub);
 }
 
 void NrMain::descent_case(void)//下降
 {
-	move_slipper_status_sub.data &= ~(uint16_t)moveslipperCommands::elavate_case_cmd;
+	move_slipper_status_sub &= ~(uint16_t)moveslipperCommands::elavate_case_cmd;
 	move_slipper_cmd_pub.publish(move_slipper_status_sub);
 }
 
 void NrMain::send_slipper(void)//スリッパの受け渡し
 {
-	move_slipper_status_sub.data ^= (uint16_t)moveslipperCommands::send_slipper_cmd;
+	move_slipper_status_sub ^= (uint16_t)moveslipperCommands::send_slipper_cmd;
 	move_slipper_cmd_pub.publish(move_slipper_status_sub);
 }
 
 void NrMain::shrink_cylinder(void)//受け渡しで展開したエアシリを元に戻す
 {
-	move_slipper_status_sub.data ^= (uint16_t)moveslipperCommands::send_slipper_cmd;
+	move_slipper_status_sub ^= (uint16_t)moveslipperCommands::send_slipper_cmd;
 	move_slipper_cmd_pub.publish(move_slipper_status_sub);
 }
 
