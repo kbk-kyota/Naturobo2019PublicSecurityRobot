@@ -60,7 +60,6 @@ private:
     void motor0CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
     void motor1CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
     void motor2CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
-    void motor3CmdVelCallback(const std_msgs::Float32::ConstPtr& msg);
 
     void moveslipperCmdCallback(const std_msgs::UInt8::ConstPtr& msg);
     void setcollectingcaseCmdCallback(const std_msgs::UInt8::ConstPtr& msg);
@@ -92,14 +91,12 @@ private:
     static constexpr uint16_t id_moveslipperStatus	        = 0x300;
     static constexpr uint16_t id_moveslipperCmd	        = 0x301;
 
-    static constexpr uint16_t id_base_motor0_cmd	    = 0x4a6;
-    static constexpr uint16_t id_base_motor0_cmd_vel    = 0x4a7;
-    static constexpr uint16_t id_base_motor1_cmd	    = 0x4a2;
-    static constexpr uint16_t id_base_motor1_cmd_vel    = 0x4a3;
-    static constexpr uint16_t id_base_motor2_cmd	    = 0x4a8;
-    static constexpr uint16_t id_base_motor2_cmd_vel    = 0x4a9;
-    static constexpr uint16_t id_base_motor3_cmd	    = 0x4a8;
-    static constexpr uint16_t id_base_motor3_cmd_vel    = 0x4a9;
+    static constexpr uint16_t id_base_motor0_cmd	    = 0x4d8;
+    static constexpr uint16_t id_base_motor0_cmd_vel    = 0x4d9;
+    static constexpr uint16_t id_base_motor1_cmd	    = 0x4c8;
+    static constexpr uint16_t id_base_motor1_cmd_vel    = 0x4c9;
+    static constexpr uint16_t id_base_motor2_cmd	    = 0x500;
+    static constexpr uint16_t id_base_motor2_cmd_vel    = 0x501;
 
     static constexpr uint16_t id_set_collectingcase_cmd         = 0x4f4;
     static constexpr uint16_t id_set_collectingcase_cmd_pos     = 0x4f5;
@@ -118,7 +115,6 @@ NrCanNode::NrCanNode(void)
     _base_motor0_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor0_cmd_vel", 10, &NrCanNode::motor0CmdVelCallback, this);
     _base_motor1_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor1_cmd_vel", 10, &NrCanNode::motor1CmdVelCallback, this);
     _base_motor2_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor2_cmd_vel", 10, &NrCanNode::motor2CmdVelCallback, this);
-    _base_motor3_cmd_vel_sub	= _nh.subscribe<std_msgs::Float32>("base/motor3_cmd_vel", 10, &NrCanNode::motor3CmdVelCallback, this);
 
     _set_collectingcase_status_pub      = _nh.advertise<std_msgs::UInt8>("motor_status", 10);
 
@@ -132,7 +128,6 @@ void NrCanNode::baseCmdCallback(const std_msgs::UInt8::ConstPtr& msg)
     this->sendData(id_base_motor0_cmd, msg->data);
     this->sendData(id_base_motor1_cmd, msg->data);
     this->sendData(id_base_motor2_cmd, msg->data);
-    this->sendData(id_base_motor3_cmd, msg->data);
 }
 
 void NrCanNode::motor0CmdVelCallback(const std_msgs::Float32::ConstPtr& msg)
@@ -148,11 +143,6 @@ void NrCanNode::motor1CmdVelCallback(const std_msgs::Float32::ConstPtr& msg)
 void NrCanNode::motor2CmdVelCallback(const std_msgs::Float32::ConstPtr& msg)
 {
     this->sendData(id_base_motor2_cmd_vel, msg->data);
-}
-
-void NrCanNode::motor3CmdVelCallback(const std_msgs::Float32::ConstPtr& msg)
-{
-    this->sendData(id_base_motor3_cmd_vel, msg->data);
 }
 
 void NrCanNode::moveslipperCmdCallback(const std_msgs::UInt8::ConstPtr& msg)

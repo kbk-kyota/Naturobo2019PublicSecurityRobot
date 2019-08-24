@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>Naturobo2019PublicSecurityRobot</name>
+  <name>nr2019</name>
   <version>0.0.0</version>
-  <description>The Naturobo2019PublicSecurityRobot package</description>
+  <description>The nr2019 package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
