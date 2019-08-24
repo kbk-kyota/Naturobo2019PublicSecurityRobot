@@ -1,5 +1,5 @@
 <launch>
-    <rosparam file="$(find Naturobo2019PublicSecurityRobot_main_ros)/param/logitech_f710_joy_assign.yaml" command="load" />
+    <rosparam file="$(find nr2019)/param/logitech_f710_joy_assign.yaml" command="load" />
 
     <arg name="use_joy" value="true" />
     <!-- base controller -->
@@ -12,7 +12,6 @@
         <remap from="motor0_cmd_vel" to="base/motor0_cmd_vel" />
         <remap from="motor1_cmd_vel" to="base/motor1_cmd_vel" />
         <remap from="motor2_cmd_vel" to="base/motor2_cmd_vel" />
-        <remap from="motor3_cmd_vel" to="base/motor3_cmd_vel" />
     </node>
     
     <!-- joy teleop -->
@@ -24,17 +23,17 @@
         <param name="deadzone" value="0.12" />
     </node>
     
-    <node pkg="Naturobo2019PublicSecurityRobot_main_ros" type="nr_main_semiauto" name="main" output="screen" />
+    <node pkg="nr2019" type="nr_main_semiauto" name="main" output="screen" />
     <!-- shutdown controller -->
     <node pkg="base_controller" type="shutdown_controller_joy" name="shutdown_ctrl" />
     
-    <node pkg="Naturobo2019PublicSecurityRobot_main_ros" type="nr_can" name="nr_can" >
+    <node pkg="nr2019" type="nr_can" name="nr_can" >
     	<remap from="motor_status" to="move_slipper/cmd" />
     </node>
     
     <!-- usb_can -->
     <node pkg="nhk2019_main_ros" type="usb_can_node_19" name="usb_can_node_19" respawn="true" output="screen">
-        <param name="port" value="/dev/ttyACM0" />
+        <param name="port" value="/dev/ttyUSB0" />
     </node>
     
     
