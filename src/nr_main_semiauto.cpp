@@ -176,6 +176,8 @@ void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
     static bool last_b = false;
     static bool last_x = false;
     static bool last_y = false;
+    static bool last_start = false;
+    static bool last_select = false;
 
     bool _a = joy->buttons[ButtonA];
     bool _b = joy->buttons[ButtonB];
@@ -230,13 +232,13 @@ void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
     }
     else if(_start && !last_start)
     {
-    	ROS_INFO("enable")
-    	base_cmd_msg.data = (uint8_t)MotorCommands::reset;
-    	base_cmd_pub.publish(bae_cmd_msg);
+    	ROS_INFO("enable");
+    	base_cmd_msg.data = (uint8_t)MotorCommands::reset_cmd;
+    	base_cmd_pub.publish(base_cmd_msg);
     }
     else if(_select && !last_select)
     {
-    	ROS_TNFO("shutdown");
+    	ROS_INFO("shutdown");
     	NrMain::shutdown();
     }
 
@@ -249,7 +251,6 @@ void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
 
 void NrMain::shutdown(void)
 {
-    ROS_INFO("shutdown");
 
     move_slipper_cmd_msg.data = (uint16_t)moveslipperCommands::shutdown_cmd;
     move_slipper_cmd_pub.publish(move_slipper_cmd_msg);
