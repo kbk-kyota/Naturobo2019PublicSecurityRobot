@@ -22,10 +22,10 @@
 //昇降と受け渡しで使うエアシリ
 enum class moveslipperCommands : uint8_t//エアシリのコマンド一覧
 {
-    shutdown_cmd        = 0b0000,
-    enable_cmd           = 0b0000,
+    shutdown_cmd        = 0x00,
+    enable_cmd           = 0x10,
 
-    elavate_case_cmd     = 0b0001,
+    elavate_case_cmd     = 0x01,
 };
 
 //モータ
@@ -52,7 +52,7 @@ private:
     //エアシリ
     ros::Subscriber move_slipper_status_sub;
     ros::Publisher move_slipper_cmd_pub;
-    std_msgs::UInt16 move_slipper_cmd_msg;
+    std_msgs::UInt8 move_slipper_cmd_msg;
 
     //アーム
     ros::Subscriber motor_status_sub;
@@ -70,10 +70,9 @@ private:
     void shutdown(void);
     void enable(void);
 
-    void set_arm(void);
+    void set_arm(float);
 
-    void elavate_case(void);
-    void descent_case(void);
+    void elavate_case(uint8_t);
 
     static int ButtonA;
 	static int ButtonB;
@@ -124,7 +123,7 @@ NrMain::NrMain(void)
     this->set_collectingcase_cmd_pub = nh_.advertise<std_msgs::UInt8>("set_collectingcase_cmd", 10);
     this->set_collectingcase_cmd_vel_pub = nh_.advertise<std_msgs::Float32>("set_collectingcase_cmd_vel", 10);
 
-    this->move_slipper_cmd_pub = nh_.advertise<std_msgs::UInt16>("move_slipper/cmd", 1);
+    this->move_slipper_cmd_pub = nh_.advertise<std_msgs::UInt8>("moveslipper/cmd", 1);
 
     this->joy_sub = nh_.subscribe<sensor_msgs::Joy>("joy", 10, &NrMain::joyCallback, this);
 
@@ -144,7 +143,6 @@ NrMain::NrMain(void)
     nh_.getParam("AxisRightThumbX", AxisRightThumbX);
     nh_.getParam("AxisRightThumbY", AxisRightThumbY);
 
-    this->command_list = &NrMain::commands;
 }
 
 void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
@@ -155,72 +153,54 @@ void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
     static bool last_y = false;
     static bool last_start = false;
     static bool last_select = false;
-    static bool last_leftthumb = false;
-    static bool last_rightthumb = false;
-
+    static float last_padx = 0.0;
+ 
     bool _a = joy->buttons[ButtonA];
     bool _b = joy->buttons[ButtonB];
     bool _x = joy->buttons[ButtonX];
     bool _y = joy->buttons[ButtonY];
     bool _start = joy->buttons[ButtonStart];
     bool _select = joy->buttons[ButtonSelect];//selectと書いてあるが、実際はbackである
-    bool _leftthumb = joy->buttons[ButtonLeftThumb];
-    bool _rightthumb = joy->buttons[ButtonRightThumb];
+    float _padx = joy->axes[AxisDPadX];
 
     int elevator_status = 0;
     int send_status = 0;
 
     if (_select)
     {
-       ROS_INFO("_select"); 
+       ROS_INFO("shutdown"); 
        this->shutdown();
     }
     else if(_start)
     {
-        ROS_INFO("_start");
+        ROS_INFO("enable");
     	this->enable();
     	elevator_status = 0;
     	send_status = 0;
     }
-    else if (_a && !last_a)
+    else if (_b && !last_b)
     {
-    	if(elevator_status = 0)
-    	    	{
-    	    		ROS_INFO("elevated the case.");
-    	        	NrMain::elavate_case();
-    	        	elevator_status = 1;
-    	    	}
-    	    	else
-    	    	{
-    	        	ROS_INFO("descent the case.");
-    	        	NrMain::descent_case();
-    	        	elevator_status = 0;
-    	    	}
+        ROS_INFO("elevated the case.");
+ 	NrMain::elavate_case(0x01);
+ 
     }
-    else if (_rightthumb && !last_rightthumb)
+    else if (_padx && !last_padx)
     {
-    	ROS_INFO("move arm right");
-    	this->NrMain::set_arm(1.0);
+    	ROS_INFO("move arm");
+    	this->NrMain::set_arm(_padx);
     }
-    else if (_lefttthumb && !last_leftthumb)
-    {
-    	ROS_INFO("move arm left");
-    	this->NrMain::set_arm(-1.0);
-    }
-
     last_a = _a;
     last_b = _b;
     last_x = _x;
     last_y = _y;
-    last_start = _start;
-    last_select = _select;
+    last_padx = _padx;
 
  }
 
 void NrMain::shutdown(void)
 {
 
-    move_slipper_cmd_msg.data = (uint16_t)moveslipperCommands::shutdown_cmd;
+    move_slipper_cmd_msg.data = (uint8_t)moveslipperCommands::shutdown_cmd;
     move_slipper_cmd_pub.publish(move_slipper_cmd_msg);
 
     base_cmd_msg.data = (uint8_t)MotorCommands::shutdown_cmd;
@@ -233,8 +213,6 @@ void NrMain::shutdown(void)
 void NrMain::enable(void)
 {
     move_slipper_cmd_msg.data = (uint8_t)moveslipperCommands::enable_cmd;
-
-    move_slipper_cmd_msg.data = (uint16_t)moveslipperCommands::enable_cmd;
     move_slipper_cmd_pub.publish(move_slipper_cmd_msg);
 
     base_cmd_msg.data = (uint8_t)MotorCommands::enable_cmd;
@@ -250,15 +228,9 @@ void NrMain::set_arm(float angle)//アームを動かす
 	set_collectingcase_cmd_vel_pub.publish(set_collectingcase_cmd_vel_msg);
 }
 
-void NrMain::elavate_case(void)//昇降
+void NrMain::elavate_case(uint8_t data)//昇降
 {
-	move_slipper_cmd_msg.data |= (uint8_t)moveslipperCommands::elavate_case_cmd;
-	move_slipper_cmd_pub.publish(move_slipper_cmd_msg);
-}
-
-void NrMain::descent_case(void)//下降
-{
-	move_slipper_cmd_msg.data &= ~(uint8_t)moveslipperCommands::elavate_case_cmd;
+	move_slipper_cmd_msg.data = data;
 	move_slipper_cmd_pub.publish(move_slipper_cmd_msg);
 }
 

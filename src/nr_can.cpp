@@ -88,8 +88,8 @@ private:
     ros::Subscriber _set_collectingcase_cmd_pos_sub;
 
 
-    static constexpr uint16_t id_moveslipperStatus	        = 0x300;
-    static constexpr uint16_t id_moveslipperCmd	        = 0x301;
+    static constexpr uint16_t id_moveslipperStatus	        = 0x5e1;
+    static constexpr uint16_t id_moveslipperCmd	        = 0x5e2;
 
     static constexpr uint16_t id_base_motor0_cmd	    = 0x4d8;
     static constexpr uint16_t id_base_motor0_cmd_vel    = 0x4d9;
