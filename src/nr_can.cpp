@@ -95,12 +95,12 @@ private:
     static constexpr uint16_t id_base_motor0_cmd_vel    = 0x4d9;
     static constexpr uint16_t id_base_motor1_cmd	    = 0x4c8;
     static constexpr uint16_t id_base_motor1_cmd_vel    = 0x4c9;
-    static constexpr uint16_t id_base_motor2_cmd	    = 0x500;
-    static constexpr uint16_t id_base_motor2_cmd_vel    = 0x501;
+    static constexpr uint16_t id_base_motor2_cmd	    = 0x4b4;
+    static constexpr uint16_t id_base_motor2_cmd_vel    = 0x4b5;
 
-    static constexpr uint16_t id_set_collectingcase_cmd         = 0x4f4;
-    static constexpr uint16_t id_set_collectingcase_cmd_pos     = 0x4f5;
-    static constexpr uint16_t id_set_collectingcase_status      = 0x4f7;
+    static constexpr uint16_t id_set_collectingcase_cmd         = 0x4a0;
+    static constexpr uint16_t id_set_collectingcase_cmd_pos     = 0x4a1;
+    static constexpr uint16_t id_set_collectingcase_status      = 0x4a3;
 };
 
 NrCanNode::NrCanNode(void)

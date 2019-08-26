@@ -4,8 +4,8 @@
     <arg name="use_joy" value="true" />
     <!-- base controller -->
     <node pkg="base_controller" type="base_controller" name="base_ctrl" output="screen">
-        <param name="motor_max_acc" value="50.0" />
-        <param name="motor_max_vel" value="80.0" />
+        <param name="motor_max_acc" value="40.0" />
+        <param name="motor_max_vel" value="50.0" />
         <param name="invert_x" value="false" />
         <param name="invert_y" value="false" />
         <param name="invert_z" value="false" />
@@ -29,7 +29,8 @@
     
     <node pkg="nr2019" type="nr_can" name="nr_can" >
     	<remap from="motor_status" to="move_slipper/cmd" />
-    </node>
+	<remap from="set_collectingcase_cmd_pos" to="set_collectingcase_cmd_vel" /> 
+   </node>
     
     <!-- usb_can -->
     <node pkg="nhk2019_main_ros" type="usb_can_node_19" name="usb_can_node_19" respawn="true" output="screen">

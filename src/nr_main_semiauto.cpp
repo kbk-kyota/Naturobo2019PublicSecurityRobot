@@ -19,6 +19,8 @@
 #include <vector>
 #include <string>
 
+int arm_status = 0;
+
 //昇降と受け渡しで使うエアシリ
 enum class moveslipperCommands : uint8_t//エアシリのコマンド一覧
 {
@@ -163,8 +165,6 @@ void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
     bool _select = joy->buttons[ButtonSelect];//selectと書いてあるが、実際はbackである
     float _padx = joy->axes[AxisDPadX];
 
-    int elevator_status = 0;
-    int send_status = 0;
 
     if (_select)
     {
@@ -175,20 +175,29 @@ void NrMain::joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
     {
         ROS_INFO("enable");
     	this->enable();
-    	elevator_status = 0;
-    	send_status = 0;
     }
-    else if (_b && !last_b)
+    else if(_a && !last_a)
+    {
+        ROS_INFO("move arm");
+	this->NrMain::set_arm(-0.1);
+    } 
+   else if (_b && !last_b)
     {
         ROS_INFO("elevated the case.");
  	NrMain::elavate_case(0x01);
  
     }
-    else if (_padx && !last_padx)
+    else if (_x && !last_x)
     {
-    	ROS_INFO("move arm");
-    	this->NrMain::set_arm(_padx);
+	ROS_INFO("stop arm");
+	this->NrMain::set_arm(0.0);
     }
+    else if(_y && !last_y)
+    {
+	ROS_INFO("return arm");
+	this->NrMain::set_arm(0.1);
+    }
+
     last_a = _a;
     last_b = _b;
     last_x = _x;
@@ -224,6 +233,10 @@ void NrMain::enable(void)
 
 void NrMain::set_arm(float angle)//アームを動かす
 {
+	set_collectingcase_cmd_msg.data = (uint8_t)MotorCommands::shutdown_cmd;
+	set_collectingcase_cmd_pub.publish(set_collectingcase_cmd_msg);
+	set_collectingcase_cmd_msg.data = (uint8_t)MotorCommands::enable_cmd;
+	set_collectingcase_cmd_pub.publish(set_collectingcase_cmd_msg);
 	set_collectingcase_cmd_vel_msg.data = angle;
 	set_collectingcase_cmd_vel_pub.publish(set_collectingcase_cmd_vel_msg);
 }
